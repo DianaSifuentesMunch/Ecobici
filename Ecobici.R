@@ -47,7 +47,11 @@
 #install.packages("igraph")
 #install.packages("reshape2")
 #install.packages("sp")
-#install.packages("geosphere")
+install.packages("geosphere")
+
+
+rm(list=ls(all=TRUE))
+
 
 library(reshape2)
 library(igraph)
@@ -63,6 +67,7 @@ setwd("/Users/Diana/Documents/Personal/Personal/LABCDMX/Ecobici/Ecobici")
 ###calcular distancias
 
 data<-read.table(file="estaciones.csv", header = TRUE, sep = ",", quote = "\"'", dec = ".", as.is = TRUE)
+
 index<-order(data[,1])
 data<-data[index,]
 data<-cbind(data$id,data$location.lat,data$location.lon,data$nearbyStations.0,data$nearbyStations.1,data$nearbyStations.2,data$nearbyStations.3)
@@ -80,36 +85,39 @@ fwrite(distancias,file="distancias.csv",col.names=FALSE)
 #hay datos desde feb 2010 hasta febrero 2017.
 meses<-c("01" , "02",  "03" , "04" , "05" , "06" , "07",  "08",  "09" , "10" ,"11", "12")
 años<-seq(2010,2017,1)
+años<-c(2016)
 #ejemplo de liga a csv ecobici
 #https://www.ecobici.cdmx.gob.mx/sites/default/files/data/usages/2017-01.csv
 
 lista<-c()
-l2<-c()
 for (a in años)
 {
 for(m in meses)
 {
 s<-paste("https://www.ecobici.cdmx.gob.mx/sites/default/files/data/usages/",a,"-",m,".csv",sep="")
-l2<-c(l2,paste(a,m,sep=" "))
 lista<-c(lista,s)
 }}
 
 #quitar los años / meses que no existen (esto se puede quitar con un try catch )
-lista<-lista[-c(1,87:96)]
+#lista<-lista[-c(1,87:96)]
+
+l<-1
 dat<-fread(lista[l],verbose=FALSE,showProgress=FALSE)
 dat<-as.data.frame(dat)
-for (l in lista)
+for (l in 2:length(lista))
 {
-mydat <- fread(lista[l])
+mydat <- fread(lista[l],verbose=FALSE,showProgress=FALSE)
 mydat<-as.data.frame(mydat)
 dat<-rbind(dat,mydat)
-print(i)
+print(l)
 }
+
 fwrite(dat,file="ecobici.csv",col.names=FALSE)
 
 
 #limpiarlos
 ##ver de que clase los leyo
+
 data<-fread("ecobici.csv")
 data<-as.data.frame(data)
 dim(data)
@@ -138,9 +146,11 @@ for (n in year)
 rm(list=ls(all=TRUE))
 
 años<-seq(2010,2017,1)
+
+años<-seq(2012,2017,1)
+
 year<-paste(años)
-n<-year[2]
-dim(distancias)
+n<-year[1]
 
 for (n in year)
 {
@@ -186,7 +196,7 @@ aux2<-sapply(aux,function(x) data$Ciclo_Estacion_Arribo[x]==data$Ciclo_Estacion_
 data<-cbind(data,aux2)
 names(data)[dim(data)[2]]<-"Misma_Estacion"
 
-
+rm(aux2)
 #hay un tema de que algunas entradas tienen hora de entrega 0 que != a 00:00:00. Esto puede significar dos cosas, no entregaron la bici o la entregaron justo a la hora cero. Esto es importante saberlo
 
 # numero estaciones con arribo o destino no identificados
@@ -195,8 +205,8 @@ ind1<-which(data$Ciclo_Estacion_Arribo>452)
 ind2<-which(data$Ciclo_Estacion_Retiro>452)
 
 
-intersect(ind1,ind2)
-length(ind1)+length(ind2)-length(intersect(ind1,ind2))
+#intersect(ind1,ind2)
+#length(ind1)+length(ind2)-length(intersect(ind1,ind2))
 #quitar las entradas con esta estacion desconocida
 aux<-unique(sort(c(ind1,ind2)))
 length(aux)
@@ -206,13 +216,15 @@ data<-data[-aux,]}
 #calcular distancia del viaje
 distancias<-fread("distancias.csv")
 distancias<-as.matrix(distancias)
-distance<-unlist(lapply(seq(1:dim(data)[1]),function(x) distancias[data$Ciclo_Estacion_Retiro[x],data$Ciclo_Estacion_Arribo[x]]))
+distance<-sapply(seq(1:dim(data)[1]),function(x) distancias[data$Ciclo_Estacion_Retiro[x],data$Ciclo_Estacion_Arribo[x]])
 #agregarl la columna a nuestro database
 data<-cbind(data,distance)
 names(data)[dim(data)[2]]<-"distancia"
 
 fwrite(data,file=paste("ecobici",n,"_C",".csv",sep=""),row.names=FALSE,col.names=TRUE)
 
+rm(distance,distancias,aux,ind1,ind2,data)
+gc()
 }
 
 
@@ -236,16 +248,14 @@ print(class(data[,i]))
 nombres<-c("Genero_Usuario" ,  "Edad_Usuario" , "Bici" , "Ciclo_Estacion_Retiro", "Ciclo_Estacion_Arribo", "Hora_Retiro" ,"Hora_Arribo"  , "duracion" , "dia_semana", "Misma_Estacion","Hora_T" , "distancia")
 
 id.v<-c("Genero_Usuario" , "Bici" , "Ciclo_Estacion_Retiro", "Ciclo_Estacion_Arribo", "dia_semana", "Hora_T")
-
-
 id.v<-c("Ciclo_Estacion_Retiro", "Ciclo_Estacion_Arribo")
 
-id.v<-c("Genero_Usuario" ,  "Edad_Usuario" , "Bici" , "Ciclo_Estacion_Retiro", "Ciclo_Estacion_Arribo", "Hora_Retiro" ,"Hora_Arribo"  , "duracion" , "dia_semana", "Misma_Estacion","Hora_T" , "distancia")
+id.v<-c("Genero_Usuario" ,  "Edad_Usuario" , "Bici" , "Ciclo_Estacion_Retiro", "Ciclo_Estacion_Arribo", "Hora_Retiro" ,"Hora_Arribo"  , "duracion" , "dia_semana", "Misma_Estacion","Hora_T","distancia" )
 
 
 #measure.v<-c("Edad_Usuario","Hora_Retiro","Hora_Arribo","duracion","Hora_T","distancia","Misma_Estacion","dia_semana")
 d2<-melt(data,id.vars=id.v,na.rm=FALSE)
-aristas<-dcast(d2, Ciclo_Estacion_Retiro * Ciclo_Estacion_Arribo ~ .)
+aristas<-dcast(d2, Ciclo_Estacion_Retiro + Ciclo_Estacion_Arribo ~ .)
 head(aristas)
 ind1<-which(data$Ciclo_Estacion_Retiro==1)
 ind2<-which(data$Ciclo_Estacion_Arribo==1)
