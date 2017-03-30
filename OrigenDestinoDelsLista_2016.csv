@@ -1,0 +1,10 @@
+source,target,weight
+Benito Juarez,Benito Juarez,913315
+Cuauhtemoc,Benito Juarez,395036
+Miguel Hidalgo,Benito Juarez,51838
+Benito Juarez,Cuauhtemoc,400109
+Cuauhtemoc,Cuauhtemoc,5350445
+Miguel Hidalgo,Cuauhtemoc,663876
+Benito Juarez,Miguel Hidalgo,42202
+Cuauhtemoc,Miguel Hidalgo,541309
+Miguel Hidalgo,Miguel Hidalgo,710630
