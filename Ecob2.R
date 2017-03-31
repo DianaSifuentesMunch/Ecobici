@@ -2,10 +2,11 @@
 
 #analisis de datos de 2016.
 year<-2016
-distancias<-fread("distancias.csv")
+
 #load libraries
 library(data.table)
 
+distancias<-fread("distancias.csv")
 #setwd
 #setwd("/Users/Diana/Documents/Personal/Personal/LabCDMX/Ecobici/Ecobici")
 
@@ -88,40 +89,58 @@ fwrite(ODDel2,file=paste("OrigenDestinoDelsLista_",year,".csv",sep=""),row.names
 #estadistica descriptiva
 
 #distancia por viaje promedio
-mean(data$distancia[which(data$distancia!=0)])
-#1653.927 km
+
+indexF<-intersect(which(data$distancia!=0),which(data$Genero_Usuario=="F"))
+mean(data$distancia[indexF])
+summary(data$distancia[indexF])
+
+indexM<-intersect(which(data$distancia!=0),which(data$Genero_Usuario=="M"))
+mean(data$distancia[indexM])
+summary(data$distancia[indexM])
+
+summary(data$distancia[which(data$distancia!=0)])
+#1653.927 metros
+#distancia total 
+sum(data$distancia)/1000
+#14,603,825 km
+
+#distancias totales por sexo 
+sum(data$distancia[indexF])/1000
+#3494157
+sum(data$distancia[indexH])/1000
+# 11109668
+
+#distancias por Edad 
+sum(data$distancia[indexF])/1000
+#3494157
+sum(data$distancia[indexH])/1000
+# 11109668
 
 
-#día de la semana de uso de bici
+
+#d??a de la semana de uso de bici
 sem<-table(data$dia_semana)
-sem/sum(sem)
+sem[c(2,6,7,5,1,3,4)]/sum(sem)
 
 #   Friday     Monday   Saturday     Sunday   Thursday    Tuesday  Wednesday
 #0.16522777 0.16557302 0.07603575 0.06314005 0.17625761 0.18038718 0.17337861
 
-
-
 #dia de la semana de uso de bici por sexo
 semsex1<-table(data$dia_semana,names=data$Genero_Usuario)
-
-
 semsex<-cbind(semsex1[,1]/sum(semsex1[,1]),semsex1[,2]/sum(semsex1[,2]))
 colnames(semsex)<-c("F","M")
 semsex<-semsex[c(2,6,7,5,1,3,4),]
 semsex1<-semsex1[c(2,6,7,5,1,3,4),]
 
 
-
-#semsex
-#                   F          M
-#Friday    0.15933257 0.16718332
+#F          M
 #Monday    0.16248714 0.16659667
-#Saturday  0.08317323 0.07366811
-#Sunday    0.07606373 0.05885302
-#Thursday  0.17187470 0.17771151
 #Tuesday   0.17716477 0.18145611
 #Wednesday 0.16990387 0.17453125
-
+#Thursday  0.17187470 0.17771151
+#Friday    0.15933257 0.16718332
+#Saturday  0.08317323 0.07366811
+#Sunday    0.07606373 0.05885302
 
 #plot(semsex)
 
@@ -132,6 +151,25 @@ hrsex<-cbind(hrsex1[,1]/sum(hrsex1[,1]),hrsex1[,2]/sum(hrsex1[,2]))
 colnames(hrsex)<-c("F","M")
 print(hrsex*100)
 
+#tabla de usos por hora y dia de la semana 
+t<-plot(seq(1,dim(d)[1],1),t[,1],type="l")
+
+lines(seq(1,dim(d)[1],1),t[,1],type="l",col="2")
+lines(seq(1,dim(d)[1],1),t[,2],type="l",col="3")
+lines(seq(1,dim(d)[1],1),t[,3],type="l",col="4")
+lines(seq(1,dim(d)[1],1),t[,4],type="l",col="5")
+lines(seq(1,dim(d)[1],1),t[,5],type="l",col="6")
+lines(seq(1,dim(d)[1],1),t[,6],type="l",col="7")
+lines(seq(1,dim(d)[1],1),t[,7],type="l",col="8")
+table(data$Hora_T, data$dia_semana)
+
+#uso versus edad. 
+
+
+#Hay unos datos con duraci??n de viaje menor a 1 minuto y que si cambian de estacion,
+#esto resulta en unas velocidades inverosimiles. Segun wikipedia el record es de 82km/hr por lo que consideraremos unicamente las menores a 80  
+#cwe
+mean(data$velocidad[which(velocidad<80)])
 
 #Multas:
 
