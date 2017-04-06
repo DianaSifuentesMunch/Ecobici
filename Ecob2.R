@@ -263,20 +263,6 @@ t<-table(data$Ciclo_Estacion_Arribo, names=data$Genero_Usuario)
 sums<-colSums(t)
 
 
-#Bicicleta que se utiliz?? m??s 
-library("reshape2")
-
-distancia<-data$distancia
-class(distancia)
-bicis<-data$Bici
-aux<-data.frame(bicis,distancia)
-ind<-which(aux$distancia>5000)
-aux<-aux[-ind,]
-aux2<-melt(aux)
-aux3<-dcast(aux2, bicis ~ ., sum) 
-who<-which.max(aux3[,2])
-
-aux3[who,]
 
 
 #VELOCIDADES
@@ -369,4 +355,40 @@ csums<-colSums(t)
 trows<-apply(t,2,function(x) x/rsums)
 tcols<-t(apply(t,1,function(x) x/csums))
 ####
+
+
+###matriz origen destino de la bici mas recorrida. 
+#Bicicleta que se utiliz?? m??s 
+library("reshape2")
+
+distancia<-data$distancia
+class(distancia)
+bicis<-data$Bici
+aux<-data.frame(bicis,distancia)
+ind<-which(aux$distancia>5000)
+aux<-aux[-ind,]
+aux2<-melt(aux)
+aux3<-dcast(aux2, bicis ~ ., sum) 
+who<-which.max(aux3[,2])
+
+bici<-as.numeric(levels(aux3[who,1]))[aux3[who,1]]
+
+names(data)
+class(data$Bici)
+bicidata<-data[which(data$Bici==bici),]
+
+class(bicidata)
+bicidata<-as.data.frame(bicidata)
+
+t<-table(bicidata$Ciclo_Estacion_Retiro,bicidata$Ciclo_Estacion_Arribo)
+t<-as.data.frame(t)
+fwrite(t, file= paste("OD_BICI", bici, ".csv", sep=""))
+fwrite(bicidata,file=paste("Data_BICI", bici, ".csv", sep=""))
+
+
+head(bicidata)
+
+
+
+
 
